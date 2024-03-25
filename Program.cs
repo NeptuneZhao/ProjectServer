@@ -113,7 +113,8 @@ namespace ProjectServer
 						string ReceiveStr = Encoding.UTF8.GetString(arrserverrecmsg, 0, length);
 						// 将收到的字符串通过委托事件传给窗体，用于消息处理
 						HaveMsg.Invoke(ThisClientSocket.RemoteEndPoint.ToString() + "：" + ReceiveStr);
-						Send(DicSocket.Keys.ToList(), ThisClientSocket.RemoteEndPoint.ToString() + "：" + ReceiveStr);
+						// 暂时先将信息转发到所有客户端
+						Send(ThisClientSocket.RemoteEndPoint.ToString() + "：" + ReceiveStr, DicSocket.Values.ToArray());
 					}
 					catch
 					{
