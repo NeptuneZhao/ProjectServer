@@ -41,7 +41,7 @@ namespace ProjectServer
 			public event SendMsg HaveMsg;
 
 			// 存储客户端 Socket
-			private readonly Dictionary<string, Client> DicSocket = new();
+			public readonly Dictionary<string, Client> DicSocket = new();
 
 			// 服务端监听
 			public bool Listen(IPAddress ip, int port, int MaxClientNum)
@@ -80,16 +80,17 @@ namespace ProjectServer
 				}
 			}
 			// 向客户端发消息
-			public void Send(List<string> SendTo, string str)
+			public void Send(string str, params Client[] socket)
 			{
 				try
 				{
 					byte[] arrsendmsg = Encoding.UTF8.GetBytes(str);
-					foreach (string client in SendTo)
+					foreach (Client client in socket)
 					{
-						if (DicSocket[client].ClientSocket.Send(arrsendmsg) != arrsendmsg.Length)
-							HaveMsg.Invoke("[SERVER]-提示信息：向" + client + "发送失败！");
+						if (client.ClientSocket.Send(arrsendmsg) != arrsendmsg.Length)
+							HaveMsg.Invoke("[SERVER]-发送失败！");
 					}
+
 				}
 				catch (Exception ex)
 				{
@@ -110,9 +111,8 @@ namespace ProjectServer
 						if (length <= 0)
 							continue;
 						string ReceiveStr = Encoding.UTF8.GetString(arrserverrecmsg, 0, length);
-						// 将收到的字符串通过委托事件传给窗体，用于窗体显示
+						// 将收到的字符串通过委托事件传给窗体，用于消息处理
 						HaveMsg.Invoke(ThisClientSocket.RemoteEndPoint.ToString() + "：" + ReceiveStr);
-						// 直接转发给所有客户端
 						Send(DicSocket.Keys.ToList(), ThisClientSocket.RemoteEndPoint.ToString() + "：" + ReceiveStr);
 					}
 					catch
@@ -124,11 +124,6 @@ namespace ProjectServer
 					}
 					Thread.Sleep(200);
 				}
-			}
-
-			public List<string> GetClients()
-			{
-				return DicSocket.Keys.ToList();
 			}
 
 			public void Close(List<string> CloseWho)
