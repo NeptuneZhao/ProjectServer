@@ -127,14 +127,14 @@ namespace ProjectServer
 				}
 			}
 
-			public void Close(List<string> CloseWho)
+			public void Close(params Client[] CloseWho)
 			{
-				foreach (string client in CloseWho)
+				foreach (Client client in CloseWho)
 				{
-					if (DicSocket[client].ClientThread.ThreadState == ThreadState.Running)
-						DicSocket[client].ClientThread.Abort();
+					if (client.ClientThread.ThreadState == ThreadState.Running)
+						client.ClientThread.Abort();
 					// 如果接收线程正在执行，那么先关闭线程，然后关闭 Socket
-					DicSocket[client].ClientSocket.Close();
+					client.ClientSocket.Close();
 				}
 			}
 		}
